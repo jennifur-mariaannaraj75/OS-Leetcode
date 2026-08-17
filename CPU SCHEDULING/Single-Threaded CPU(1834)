@@ -1,0 +1,44 @@
+class Solution {
+    public int[] getOrder(int[][] tasks) {
+        int n=tasks.length;
+        int[] result=new int[n];
+        
+        int[][] extendedTasks=new int[n][3];
+        for(int i=0;i<n;i++){
+            extendedTasks[i][0]=tasks[i][0];
+            extendedTasks[i][1]=tasks[i][1];
+            extendedTasks[i][2]=i;
+        }
+        Arrays.sort(extendedTasks,(a,b)->Integer.compare(a[0],b[0]));
+
+        PriorityQueue<int[]> minheap=new PriorityQueue<>((a,b)->{
+        if(a[1]!=b[1])
+            return Integer.compare(a[1],b[1]);
+        return Integer.compare(a[2],b[2]);
+    });
+    long currentTime=0;
+    int taskidx=0;
+    int resultidx=0;
+    while(taskidx<n || !minheap.isEmpty()){
+        if(minheap.isEmpty() && currentTime<extendedTasks[taskidx][0]) 
+            currentTime=extendedTasks[taskidx][0];
+        while(taskidx<n && extendedTasks[taskidx][0]<=currentTime){
+            minheap.add(extendedTasks[taskidx]);
+            taskidx++;
+        }
+        int[] currenttask=minheap.poll();
+        result[resultidx++]=currenttask[2];
+        currentTime+=currenttask[1];
+        }
+        return result;
+    }
+}
+
+
+Input
+tasks =
+[[7,10],[7,12],[7,5],[7,4],[7,2]]
+Output
+[4,3,2,0,1]
+Expected
+[4,3,2,0,1]
