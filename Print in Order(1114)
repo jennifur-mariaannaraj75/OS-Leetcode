@@ -1,0 +1,36 @@
+import java.util.concurrent.Semaphore;
+
+class Foo {
+    private final Semaphore firstFinished;
+    private final Semaphore secondFinished;
+
+    public Foo() {
+        firstFinished = new Semaphore(0);
+        secondFinished = new Semaphore(0);
+    }
+
+    public void first(Runnable printFirst) throws InterruptedException {
+        printFirst.run();
+        firstFinished.release();
+    }
+
+    public void second(Runnable printSecond) throws InterruptedException {
+        firstFinished.acquire();
+        printSecond.run();
+        secondFinished.release();
+    }
+
+    public void third(Runnable printThird) throws InterruptedException {
+        secondFinished.acquire();
+        printThird.run();
+    }
+}
+
+
+Input
+nums =
+[1,2,3]
+Output
+"firstsecondthird"
+Expected
+"firstsecondthird"
