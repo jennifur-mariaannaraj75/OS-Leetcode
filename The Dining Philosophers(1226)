@@ -1,0 +1,60 @@
+import java.util.concurrent.Semaphore;
+
+class DiningPhilosophers {
+    private final Semaphore[] forks;
+
+    public DiningPhilosophers() {
+        forks = new Semaphore[5];
+        for (int i = 0; i < 5; i++) {
+            forks[i] = new Semaphore(1);
+        }
+    }
+
+    public void wantsToEat(int philosopher,
+                           Runnable pickLeftFork,
+                           Runnable pickRightFork,
+                           Runnable eat,
+                           Runnable putLeftFork,
+                           Runnable putRightFork) throws InterruptedException {
+        
+        int leftFork = philosopher;
+        int rightFork = (philosopher + 1) % 5;
+
+        // Resource Hierarchy: Determine which fork has a lower ID
+        int firstFork = Math.min(leftFork, rightFork);
+        int secondFork = Math.max(leftFork, rightFork);
+
+        // 1. Acquire forks strictly from lowest ID to highest ID
+        forks[firstFork].acquire();
+        forks[secondFork].acquire();
+
+        // 2. Execute the required LeetCode pick actions in exact sequence
+        if (philosopher == 4) {
+            // For Philosopher 4, rightFork (0) is smaller than leftFork (4)
+            // So right is picked up physically first, but we must invoke them logically
+            pickLeftFork.run();
+            pickRightFork.run();
+        } else {
+            pickLeftFork.run();
+            pickRightFork.run();
+        }
+
+        // 3. Eat
+        eat.run();
+
+        // 4. Put down forks
+        putLeftFork.run();
+        putRightFork.run();
+
+        // 5. Release locks
+        forks[secondFork].release();
+        forks[firstFork].release();
+    }
+}
+Input
+target =
+1
+Output
+[[0,1,1],[0,2,1],[2,1,1],[2,2,1],[2,0,3],[2,1,2],[2,2,2],[3,1,1],[3,2,1],[3,0,3],[3,1,2],[3,2,2],[0,0,3],[0,1,2],[0,2,2],[1,1,1],[1,2,1],[4,1,1],[4,2,1],[4,0,3],[4,1,2],[4,2,2],[1,0,3],[1,1,2],[1,2,2]]
+Expected
+[[4,2,1],[4,1,1],[2,2,1],[3,2,1],[0,1,1],[4,0,3],[4,1,2],[4,2,2],[0,2,1],[3,1,1],[0,0,3],[0,1,2],[3,0,3],[3,1,2],[0,2,2],[3,2,2],[2,1,1],[1,2,1],[2,0,3],[2,1,2],[2,2,2],[1,1,1],[1,0,3],[1,1,2],[1,2,2]]
